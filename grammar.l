@@ -24,8 +24,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "logic2cnf.h"
-//#include "y.tab.h"
+#include "bn.h"
+#include "y.tab.h"
+
+//[0-9]*		{ yylval.num.int64 = strtoll(yytext, NULL, 0); return NUM; }
 
 /* not using the built in one because it makes noise about unused funcs */
 int	my_yylineno = 1;
@@ -42,9 +44,9 @@ char	*err_tmp;	/* temproary buffer for building a yyerror string */
 "-"		{ return MINUS; }
 "+"		{ return PLUS; }
 "\n"		{ return END; }
-[0-9]*		{ yylval.num = atol(yytext); return NUM; }
+[0-9]*		{ yylval.rawnum = strtoll(yytext, NULL, 0); return NUM; }
 "(8)"		{ return CAST8; }
-"(u8)"		{ return CASTu8; }
+"(u8)"		{ return CASTU8; }
 .		{
 			fprintf(stderr, "syntax error\n");
 		}
