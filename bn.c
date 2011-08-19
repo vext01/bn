@@ -8,6 +8,7 @@
 struct bnum_tok *
 bn_add(struct bnum_tok *a, struct bnum_tok *b)
 {
+	/* XXX fill in */
 	switch (a->width) {
 	case 1:
 		break;
@@ -43,7 +44,7 @@ bn_add(struct bnum_tok *a, struct bnum_tok *b)
 }
 
 struct bnum_tok *
-new_bnum_tok(int64_t num, uint8_t width, uint8_t signd)
+bn_new_bnum_tok(int64_t num, uint8_t width, uint8_t signd)
 {
 	struct bnum_tok		*bnum;
 
@@ -142,6 +143,7 @@ main(void)
 	printf("sizeof long long = %d\n", sizeof(long long));
 	printf("sizeof short = %d\n", sizeof(short));
 
+	/* XXX can we bolt on readline? */
 #if 0
 	while ((line = readline("> ")) != NULL) {
 		if (*line) {
