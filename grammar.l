@@ -45,6 +45,7 @@ char	*err_tmp;	/* temproary buffer for building a yyerror string */
 "+"		{ return PLUS; }
 "\n"		{ return END; }
 [0-9]*		{ yylval.rawnum = strtoll(yytext, NULL, 0); return NUM; }
+0x[0-9a-f]*	{ yylval.rawnum = strtoll(yytext, NULL, 0); return NUM; }
 "(8)"		{ return CAST8; }
 "(u8)"		{ return CASTU8; }
 .		{
