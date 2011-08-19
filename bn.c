@@ -8,34 +8,37 @@
 struct bnum_tok *
 bn_add(struct bnum_tok *a, struct bnum_tok *b)
 {
-	uint64_t		av = (uint64_t) a->num.uint64;
-	uint64_t		bv = (uint64_t) b->num.uint64;
-
-	a->num.uint64 = av + bv;
-#if 0
 	switch (a->width) {
 	case 1:
-		switch (b->width) {
-		case 1:
-			if (a->signd)
-				a->
-			break;
-		case 2:
-			break;
-		case 4:
-			break;
-		case 8:
-			break;
-		};
 		break;
 	case 2:
 		break;
 	case 4:
+		switch (b->width) {
+		case 1:
+			break;
+		case 2:
+			break;
+		case 4:
+			printf("ACK!\n");
+			if (a->signd && b->signd)
+				a->num.int32 += b->num.int32;
+			else if (a->signd && (!b->signd))
+				a->num.int32 += b->num.uint32;
+			else if ((!a->signd) && b->signd)
+				a->num.uint32 += b->num.int32;
+			else
+				a->num.uint32 += b->num.uint32;
+			break;
+		case 8:
+			break;
+		};
+
 		break;
 	case 8:
 		break;
 	}
-#endif
+
 	return (a);
 }
 
@@ -92,17 +95,40 @@ new_bnum_tok(int64_t num, uint8_t width, uint8_t signd)
 }
 
 void
+bn_possibly_print_result_arrow(struct bnum_tok *b, uint8_t width, uint8_t signd)
+{
+	if ((b->width == width) && (b->signd == signd))
+		printf("> ");
+	else
+		printf("  ");
+}
+
+void
 bn_print(struct bnum_tok *bn)
 {
-	printf("%-10s: %u\n", "uint8_t", bn->num.uint8);
-	printf("%-10s: %d\n", "int8_t", bn->num.int8);
-	printf("%-10s: %u\n", "uint16_t", bn->num.uint16);
-	printf("%-10s: %d\n", "int16_t", bn->num.int16);
-	printf("%-10s: %u\n", "uint32_t", bn->num.uint32);
-	printf("%-10s: %d\n", "int32_t", bn->num.int32);
-	printf("%-10s: %llu\n", "uint64_t", bn->num.uint64);
-	printf("%-10s: %lld\n", "int64_t", bn->num.int64);
+	bn_possibly_print_result_arrow(bn, 1, 0);
+	printf("%-10s: %-16u\n", "uint8_t", bn->num.uint8);
 
+	bn_possibly_print_result_arrow(bn, 1, 1);
+	printf("%-10s: %-16d\n", "int8_t", bn->num.int8);
+
+	bn_possibly_print_result_arrow(bn, 2, 0);
+	printf("%-10s: %-16u\n", "uint16_t", bn->num.uint16);
+
+	bn_possibly_print_result_arrow(bn, 2, 1);
+	printf("%-10s: %-16d\n", "int16_t", bn->num.int16);
+
+	bn_possibly_print_result_arrow(bn, 4, 0);
+	printf("%-10s: %-16u\n", "uint32_t", bn->num.uint32);
+
+	bn_possibly_print_result_arrow(bn, 4, 1);
+	printf("%-10s: %-16d\n", "int32_t", bn->num.int32);
+
+	bn_possibly_print_result_arrow(bn, 8, 0);
+	printf("%-10s: %-16llu\n", "uint64_t", bn->num.uint64);
+
+	bn_possibly_print_result_arrow(bn, 8, 1);
+	printf("%-10s: %-16lld\n", "int64_t", bn->num.int64);
 }
 
 int
@@ -126,8 +152,7 @@ main(void)
 	}
 #endif
 
-	while (1)
-		yyparse();
+	yyparse();
 
 	return (EXIT_SUCCESS);
 
