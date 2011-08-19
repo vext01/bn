@@ -5,40 +5,86 @@
 
 #include "bn.h"
 
+#define ADD_BLK(AAA, BBB)		\
+			if (a->signd && b->signd) \
+				a->num.int##AAA += b->num.int##BBB; \
+			else if (a->signd && (!b->signd)) \
+				a->num.int##AAA += b->num.uint##BBB; \
+			else if ((!a->signd) && b->signd) \
+				a->num.uint##AAA += b->num.int##BBB; \
+			else \
+				a->num.uint##AAA += b->num.uint##BBB; \
+			break;
+
 struct bnum_tok *
 bn_add(struct bnum_tok *a, struct bnum_tok *b)
 {
-	/* XXX fill in */
 	switch (a->width) {
 	case 1:
+		switch (b->width) {
+		case 1:
+			ADD_BLK(8, 8);
+			break;
+		case 2:
+			ADD_BLK(8, 16);
+			break;
+		case 4:
+			ADD_BLK(8, 32);
+			break;
+		case 8:
+			ADD_BLK(8, 64);
+			break;
+		};
 		break;
 	case 2:
+		switch (b->width) {
+		case 1:
+			ADD_BLK(16, 8);
+			break;
+		case 2:
+			ADD_BLK(16, 16);
+			break;
+		case 4:
+			ADD_BLK(16, 32);
+			break;
+		case 8:
+			ADD_BLK(16, 64);
+			break;
+		};
 		break;
 	case 4:
 		switch (b->width) {
 		case 1:
+			ADD_BLK(32, 8);
 			break;
 		case 2:
+			ADD_BLK(32, 16);
 			break;
 		case 4:
-			printf("ACK!\n");
-			if (a->signd && b->signd)
-				a->num.int32 += b->num.int32;
-			else if (a->signd && (!b->signd))
-				a->num.int32 += b->num.uint32;
-			else if ((!a->signd) && b->signd)
-				a->num.uint32 += b->num.int32;
-			else
-				a->num.uint32 += b->num.uint32;
+			ADD_BLK(32, 32);
 			break;
 		case 8:
+			ADD_BLK(32, 64);
 			break;
 		};
-
 		break;
 	case 8:
+		switch (b->width) {
+		case 1:
+			ADD_BLK(64, 8);
+			break;
+		case 2:
+			ADD_BLK(64, 16);
+			break;
+		case 4:
+			ADD_BLK(64, 32);
+			break;
+		case 8:
+			ADD_BLK(64, 64);
+			break;
+		};
 		break;
-	}
+	};
 
 	return (a);
 }
