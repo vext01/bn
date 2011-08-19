@@ -44,10 +44,12 @@ char	*err_tmp;	/* temproary buffer for building a yyerror string */
 "-"		{ return MINUS; }
 "+"		{ return PLUS; }
 "\n"		{ return END; }
-[0-9]*		{ yylval.rawnum = strtoll(yytext, NULL, 0); return NUM; }
-0x[0-9a-f]*	{ yylval.rawnum = strtoll(yytext, NULL, 0); return NUM; }
+[0-9]*		{ yylval.rawnum = strtoimax(yytext, NULL, 0); return NUM; }
+0x[0-9a-f]*	{ yylval.rawnum = strtoimax(yytext, NULL, 0); return NUM; }
 "(8)"		{ return CAST8; }
 "(u8)"		{ return CASTU8; }
+"(64)"		{ return CAST64; }
+"(u64)"		{ return CASTU64; }
 .		{
 			fprintf(stderr, "syntax error\n");
 		}

@@ -5,6 +5,14 @@
 
 #include "bn.h"
 
+#if 0
+struct bnum_tok *
+bn_add(struct bn_tok *a, struct bn_tok *b)
+{
+	return (NULL);
+}
+#endif
+
 struct bnum_tok *
 new_bnum_tok(int64_t num, uint8_t width, uint8_t signd)
 {
