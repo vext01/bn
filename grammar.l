@@ -48,6 +48,10 @@ char	*err_tmp;	/* temproary buffer for building a yyerror string */
 -*0x[0-9a-f]*	{ yylval.rawnum = strtoimax(yytext, NULL, 0); return NUM; }
 "(8)"		{ return CAST8; }
 "(u8)"		{ return CASTU8; }
+"(16)"		{ return CAST16; }
+"(u16)"		{ return CASTU16; }
+"(32)"		{ return CAST32; }
+"(u32)"		{ return CASTU32; }
 "(64)"		{ return CAST64; }
 "(u64)"		{ return CASTU64; }
 .		{

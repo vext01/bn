@@ -31,6 +31,8 @@
 %token PLUS MINUS
 %token NUM
 %token CAST8 CASTU8
+%token CAST16 CASTU16
+%token CAST32 CASTU32
 %token CAST64 CASTU64
 %token END
 
@@ -38,7 +40,6 @@
 	struct bnum_tok		*numt;
 	uint64_t		 rawnum;
 }
-
 
 %left PLUS
 %left MINUS
@@ -53,11 +54,15 @@ start: expr END		{ bn_print($1); YYACCEPT;}
      ;
 
 expr: num		{ $$ = $1; yydbg("num");}
-    | num PLUS num	{ $$ = bn_add($1, $3); yydbg("num PLUS num");}
+    | num PLUS expr	{ $$ = bn_add($1, $3); yydbg("num PLUS num");}
 
 num: NUM		{ $$ = bn_new_bnum_tok($1, sizeof(int), 1); yydbg("NUM");}
    | CAST8 NUM		{ $$ = bn_new_bnum_tok($2, 1, 1); yydbg("NUM");}
    | CASTU8 NUM		{ $$ = bn_new_bnum_tok($2, 1, 0); yydbg("NUM");}
+   | CAST16 NUM		{ $$ = bn_new_bnum_tok($2, 2, 1); yydbg("NUM");}
+   | CASTU16 NUM	{ $$ = bn_new_bnum_tok($2, 2, 0); yydbg("NUM");}
+   | CAST32 NUM		{ $$ = bn_new_bnum_tok($2, 4, 1); yydbg("NUM");}
+   | CASTU32 NUM	{ $$ = bn_new_bnum_tok($2, 4, 0); yydbg("NUM");}
    | CAST64 NUM		{ $$ = bn_new_bnum_tok($2, 8, 1); yydbg("NUM");}
    | CASTU64 NUM	{ $$ = bn_new_bnum_tok($2, 8, 0); yydbg("NUM");}
 
