@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 #include "bn.h"
 #include "y.tab.h"
@@ -44,8 +45,8 @@ char	*err_tmp;	/* temproary buffer for building a yyerror string */
 "-"		{ return MINUS; }
 "+"		{ return PLUS; }
 "\n"		{ return END; }
--*[0-9]*		{ yylval.rawnum = strtoimax(yytext, NULL, 0); return NUM; }
--*0x[0-9a-f]*	{ yylval.rawnum = strtoimax(yytext, NULL, 0); return NUM; }
+-*[0-9]*	{ yylval.rawnum = strtoimax(yytext, NULL, 0) % UINT64_MAX; return NUM; }
+-*0x[0-9a-f]*	{ yylval.rawnum = strtoimax(yytext, NULL, 0) % UINT64_MAX; return NUM; }
 "(8)"		{ return CAST8; }
 "(u8)"		{ return CASTU8; }
 "(16)"		{ return CAST16; }
