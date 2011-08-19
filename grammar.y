@@ -60,14 +60,13 @@ start: expr END		{ bn_print($1); YYACCEPT;}
      ;
 
 expr: num		{ $$ = $1; yydbg("num");}
-    | num PLUS num	{ yydbg("num PLUS num");}
+    | num PLUS num	{ $$ = bn_add($1, $3); yydbg("num PLUS num");}
 
 num: NUM		{ $$ = new_bnum_tok($1, sizeof(int), 1); yydbg("NUM");}
    | CAST8 NUM		{ $$ = new_bnum_tok($2, 1, 1); yydbg("NUM");}
    | CASTU8 NUM		{ $$ = new_bnum_tok($2, 1, 0); yydbg("NUM");}
    | CAST64 NUM		{ $$ = new_bnum_tok($2, 8, 1); yydbg("NUM");}
    | CASTU64 NUM	{ $$ = new_bnum_tok($2, 8, 0); yydbg("NUM");}
-
 
 %%
 

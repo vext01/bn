@@ -20,5 +20,6 @@ struct bnum_tok {
 
 
 struct bnum_tok *new_bnum_tok(int64_t num, uint8_t width, uint8_t signd);
+struct bnum_tok *bn_add(struct bnum_tok *a, struct bnum_tok *b);
 
 #endif

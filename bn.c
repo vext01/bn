@@ -5,13 +5,39 @@
 
 #include "bn.h"
 
-#if 0
 struct bnum_tok *
-bn_add(struct bn_tok *a, struct bn_tok *b)
+bn_add(struct bnum_tok *a, struct bnum_tok *b)
 {
-	return (NULL);
-}
+	uint64_t		av = (uint64_t) a->num.uint64;
+	uint64_t		bv = (uint64_t) b->num.uint64;
+
+	a->num.uint64 = av + bv;
+#if 0
+	switch (a->width) {
+	case 1:
+		switch (b->width) {
+		case 1:
+			if (a->signd)
+				a->
+			break;
+		case 2:
+			break;
+		case 4:
+			break;
+		case 8:
+			break;
+		};
+		break;
+	case 2:
+		break;
+	case 4:
+		break;
+	case 8:
+		break;
+	}
 #endif
+	return (a);
+}
 
 struct bnum_tok *
 new_bnum_tok(int64_t num, uint8_t width, uint8_t signd)
@@ -100,7 +126,8 @@ main(void)
 	}
 #endif
 
-	yyparse();
+	while (1)
+		yyparse();
 
 	return (EXIT_SUCCESS);
 
