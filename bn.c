@@ -42,35 +42,35 @@
 #include "bn.h"
 
 int64_t
-bn_to_common_signed_64(struct bnum_tok *t)
+bn_to_common_signed_64(struct bnum_tok t)
 {
 	int64_t			val;
 
-	if (t->signd) {
-		switch (t->width) {
+	if (t.signd) {
+		switch (t.width) {
 		case 1:
-			val = (int8_t) t->num.int8;
+			val = (int8_t) t.num.int8;
 			break;
 		case 2:
-			val = (int16_t) t->num.int16;
+			val = (int16_t) t.num.int16;
 			break;
 		case 4:
-			val = (int32_t) t->num.int32;
+			val = (int32_t) t.num.int32;
 			break;
 		default:
 			fprintf(stderr, "unkown width\n");
 			break;
 		};
 	} else {
-		switch (t->width) {
+		switch (t.width) {
 		case 1:
-			val = (uint8_t) t->num.int8;
+			val = (uint8_t) t.num.int8;
 			break;
 		case 2:
-			val = (uint16_t) t->num.int16;
+			val = (uint16_t) t.num.int16;
 			break;
 		case 4:
-			val = (uint32_t) t->num.int32;
+			val = (uint32_t) t.num.int32;
 			break;
 		default:
 			fprintf(stderr, "unkown width\n");
@@ -81,70 +81,67 @@ bn_to_common_signed_64(struct bnum_tok *t)
 	return (val);
 }
 
-struct bnum_tok *
-bn_cast(struct bnum_tok *t, struct bn_cast c)
+struct bnum_tok
+bn_cast(struct bnum_tok t, struct bn_cast c)
 {
 	int64_t			val = bn_to_common_signed_64(t);
 
 	return (bn_new_bnum_tok(val, c.width, c.signd));
 }
 
-struct bnum_tok *
-bn_add(struct bnum_tok *a, struct bnum_tok *b)
+struct bnum_tok
+bn_add(struct bnum_tok a, struct bnum_tok b)
 {
 	int64_t			val_a = bn_to_common_signed_64(a);
 	int64_t			val_b = bn_to_common_signed_64(b);
 
 	/* we return the type of the lhs, think that is right */
-	return (bn_new_bnum_tok(val_a + val_b, a->width, a->signd));
+	return (bn_new_bnum_tok(val_a + val_b, a.width, a.signd));
 }
 
-struct bnum_tok *
+struct bnum_tok
 bn_new_bnum_tok(int64_t num, uint8_t width, uint8_t signd)
 {
-	struct bnum_tok		*bnum;
+	struct bnum_tok		bnum;
 
 	if (num > INT32_MAX)
 		fprintf(stderr, "number was too large\n");
 
-	bnum = calloc(1, sizeof(struct bnum_tok));
-	if (!bnum)
-		fprintf(stderr, "malloc fail\n");
-
-	bnum->signd = signd;
-	bnum->width = width;
+	memset(&bnum, 0, 8);
+	bnum.signd = signd;
+	bnum.width = width;
 
 	switch(width) {
 	case 1:
 		fprintf(stderr, "width = 8\n");
 		if (signd) {
-			bnum->num.int8 = num;
+			bnum.num.int8 = num;
 		} else {
-			bnum->num.uint8 = num;
+			bnum.num.uint8 = num;
 		}
 		break;
 	case 2:
 		fprintf(stderr, "width = 16\n");
 		if (signd) {
-			bnum->num.int16 = num;
+			bnum.num.int16 = num;
 		} else {
-			bnum->num.uint16 = num;
+			bnum.num.uint16 = num;
 		}
 		break;
 	case 4:
 		fprintf(stderr, "width = 32\n");
 		if (signd) {
-			bnum->num.int32 = num;
+			bnum.num.int32 = num;
 		} else {
-			bnum->num.uint32 = num;
+			bnum.num.uint32 = num;
 		}
 		break;
 	case 8:
 		fprintf(stderr, "width = 64\n");
 		if (signd) {
-			bnum->num.int64 = num;
+			bnum.num.int64 = num;
 		} else {
-			bnum->num.uint64 = num;
+			bnum.num.uint64 = num;
 		}
 		break;
 	default:
@@ -180,13 +177,13 @@ bn_bytes_to_hex(unsigned char *bytes, int len)
 }
 
 void
-bn_print(struct bnum_tok *bn)
+bn_print(struct bnum_tok bn)
 {
 	int64_t		 val = bn_to_common_signed_64(bn);
-	char		*hex = bn_bytes_to_hex((unsigned char *) &val, bn->width);
+	char		*hex = bn_bytes_to_hex((unsigned char *) &val, bn.width);
 
 	/* XXX print the actual type like C */
-	printf("(%d %s bytes)  %d  0x%s\n", bn->width, bn->signd ? "signed" : "unsigned", bn->num.uint8, hex);
+	printf("(%d %s bytes)  %d  0x%s\n", bn.width, bn.signd ? "signed" : "unsigned", bn.num.uint8, hex);
 
 	free(hex);
 }

@@ -57,7 +57,7 @@
 %token END
 
 %union {
-	struct bnum_tok		*yd_num;
+	struct bnum_tok		 yd_num;
 	uint64_t		 yd_rawnum;
 	struct bn_cast		 yd_cast;
 }
