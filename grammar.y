@@ -42,6 +42,8 @@
 #include <stdlib.h>
 #include "bn.h"
 
+/* XXX make casts resilient to spaces in brackets */
+
 %}
 
 %start start
@@ -96,7 +98,7 @@ y(const char *msg)
 	fprintf(stderr, "yacc: %s\n", msg);
 }
 
-void yyerror(char *m)
+void yyerror(char *msg)
 {
-	y(m);
+	fprintf(stderr, "Parse error %s\n", msg);
 }
