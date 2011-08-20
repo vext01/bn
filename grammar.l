@@ -46,11 +46,15 @@
 #include "bn.h"
 #include "y.tab.h"
 
-//[0-9]*		{ yylval.num.int64 = strtoll(yytext, NULL, 0); return NUM; }
-
 /* not using the built in one because it makes noise about unused funcs */
 int	my_yylineno = 1;
 char	*err_tmp;	/* temproary buffer for building a yyerror string */
+
+void
+l(char *m)
+{
+	fprintf(stderr, "lex: %s\n", m);
+}
 
 %}
 
@@ -59,20 +63,27 @@ char	*err_tmp;	/* temproary buffer for building a yyerror string */
 
 %%
 
-[\t ]		{}
-"-"		{ return MINUS; }
-"+"		{ return PLUS; }
-"\n"		{ return END; }
--*[0-9]*	{ yylval.rawnum = strtoimax(yytext, NULL, 0) % UINT64_MAX; return NUM; }
--*0x[0-9a-f]*	{ yylval.rawnum = strtoimax(yytext, NULL, 0) % UINT64_MAX; return NUM; }
-"(8)"		{ return CAST8; }
-"(u8)"		{ return CASTU8; }
-"(16)"		{ return CAST16; }
-"(u16)"		{ return CASTU16; }
-"(32)"		{ return CAST32; }
-"(u32)"		{ return CASTU32; }
-"("		{ return LBRA; }
-")"		{ return RBRA; }
-.		{ fprintf(stderr, "syntax error\n"); }
+[\t ]		{ l("ignore"); }
+"-"		{ l("MINUS"); return MINUS; }
+"+"		{ l("PLUS"); return PLUS; }
+"\n"		{ l("END"); return END; }
+"<8>"		{ l("CAST8"); return CAST8; }
+"<u8>"		{ l("CASTU8"); return CASTU8; }
+"<16>"		{ l("CAST16"); return CAST16; }
+"<u16>"		{ l("CASTU16"); return CASTU16; }
+"<32>"		{ l("CAST32"); return CAST32; }
+"<u32>"		{ l("CASTU32"); return CASTU32; }
+-*[0-9]*	{ l("RAWNUM");
+		  yylval.yd_rawnum = strtoimax(yytext, NULL, 0);
+		  return RAWNUM;
+		}
+-*0x[0-9a-f]*	{ l("RAWNUM (hex)");
+		  yylval.yd_rawnum = strtoimax(yytext, NULL, 0);
+		  return RAWNUM;
+		}
+"("		{ l("LBRA"); return LBRA; }
+")"		{ l("RBRA"); return RBRA; }
+.		{ l("Syntax Error"); }
 
 %%
+
