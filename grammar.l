@@ -63,7 +63,7 @@ l(char *m)
 
 %%
 
-[\t ]		{ l("ignore"); }
+[\r\t ]		{ l("ignore"); }
 "-"		{ l("MINUS"); return MINUS; }
 "+"		{ l("PLUS"); return PLUS; }
 "\n"		{ l("END"); return END; }
