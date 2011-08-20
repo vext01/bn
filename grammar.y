@@ -73,15 +73,15 @@
 start: expr END		{ y("start: expr END"); bn_print($1); YYACCEPT; }
      ;
 
-expr: expr PLUS expr	{ y("expr: num PLUS num"); $$ = bn_add($1, $3); }
+expr: num PLUS expr	{ y("expr: num PLUS num"); $$ = bn_add($1, $3); }
     | LBRA expr RBRA	{ y("expr: LBRA expr RBRA"); $$ = $2; }
-    | cast expr		{ y("expr: cast expr");}
+    | cast expr		{ y("expr: cast expr"); $$ = bn_cast($2, $1); }
     | num		{ y("expr: num"); $$ = $1; }
 
 num: RAWNUM		{ y("num: RAWNUM");
 			  $$ = bn_new_bnum_tok($1, sizeof(int), 1); }
 
-cast: CASTU8		{ y("cast: CASTU8"); $$.width = 1; $$.signd = 0; }
+cast: CASTU8		{ y("cast: CASTU8"); $$.width = 1; $$.signd = 0;}
       CAST8		{ y("cast: CAST8"); $$.width = 1; $$.signd = 1; }
       CASTU16		{ y("cast: CASTU16"); $$.width = 2; $$.signd = 0; }
       CAST16		{ y("cast: CAST16"); $$.width = 2; $$.signd = 1; }

@@ -67,20 +67,18 @@ l(char *m)
 "-"		{ l("MINUS"); return MINUS; }
 "+"		{ l("PLUS"); return PLUS; }
 "\n"		{ l("END"); return END; }
-"(8)"		{ l("CAST8"); return CAST8; }
-"(u8)"		{ l("CASTU8"); return CASTU8; }
-"(16)"		{ l("CAST16"); return CAST16; }
-"(u16)"		{ l("CASTU16"); return CASTU16; }
-"(32)"		{ l("CAST32"); return CAST32; }
-"(u32)"		{ l("CASTU32"); return CASTU32; }
+"<8>"		{ l("CAST8"); return CAST8; }
+"<u8>"		{ l("CASTU8"); return CASTU8; }
+"<16>"		{ l("CAST16"); return CAST16; }
+"<u16>"		{ l("CASTU16"); return CASTU16; }
+"<32>"		{ l("CAST32"); return CAST32; }
+"<u32>"		{ l("CASTU32"); return CASTU32; }
 -*[0-9]*	{ l("RAWNUM");
 		  yylval.yd_rawnum = strtoimax(yytext, NULL, 0);
-		  return RAWNUM;
-		}
+		  return RAWNUM; }
 -*0x[0-9a-f]*	{ l("RAWNUM (hex)");
 		  yylval.yd_rawnum = strtoimax(yytext, NULL, 0);
-		  return RAWNUM;
-		}
+		  return RAWNUM; }
 "("		{ l("LBRA"); return LBRA; }
 ")"		{ l("RBRA"); return RBRA; }
 .		{ l("Syntax Error"); }
