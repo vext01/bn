@@ -88,17 +88,6 @@ bn_cast(struct bnum_tok *t, struct bn_cast c)
 	return (bn_new_bnum_tok(val, c.width, c.signd));
 }
 
-#define ADD_BLK(AAA, BBB)		\
-			if (a->signd && b->signd) \
-				a->num.int##AAA += b->num.int##BBB; \
-			else if (a->signd && (!b->signd)) \
-				a->num.int##AAA += b->num.uint##BBB; \
-			else if ((!a->signd) && b->signd) \
-				a->num.uint##AAA += b->num.int##BBB; \
-			else \
-				a->num.uint##AAA += b->num.uint##BBB; \
-			break;
-
 struct bnum_tok *
 bn_add(struct bnum_tok *a, struct bnum_tok *b)
 {
