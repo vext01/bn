@@ -60,8 +60,7 @@
 	struct bn_cast		 yd_cast;
 }
 
-%left PLUS
-%left MINUS
+%left MINUS PLUS
 
 %type <yd_rawnum> RAWNUM
 %type <yd_num> num
@@ -73,7 +72,7 @@
 start: expr END		{ y("start: expr END"); bn_print($1); YYACCEPT; }
      ;
 
-expr: num PLUS expr	{ y("expr: num PLUS num"); $$ = bn_add($1, $3); }
+expr: expr PLUS expr	{ y("expr: expr PLUS expr"); $$ = bn_add($1, $3); }
     | LBRA expr RBRA	{ y("expr: LBRA expr RBRA"); $$ = $2; }
     | cast expr		{ y("expr: cast expr"); $$ = bn_cast($2, $1); }
     | num		{ y("expr: num"); $$ = $1; }

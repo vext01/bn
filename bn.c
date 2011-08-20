@@ -24,7 +24,42 @@
 struct bnum_tok *
 bn_cast(struct bnum_tok *t, struct bn_cast c)
 {
-	return (t); /* XXX */
+	struct bnum_tok		*new;
+	int64_t			val;
+
+	if (t->signd) {
+		switch (t->width) {
+		case 1:
+			val = (int8_t) t->num.int8;
+			break;
+		case 2:
+			val = (int16_t) t->num.int16;
+			break;
+		case 4:
+			val = (int32_t) t->num.int32;
+			break;
+		default:
+			fprintf(stderr, "unkown width\n");
+			break;
+		};
+	} else {
+		switch (t->width) {
+		case 1:
+			val = (uint8_t) t->num.int8;
+			break;
+		case 2:
+			val = (uint16_t) t->num.int16;
+			break;
+		case 4:
+			val = (uint32_t) t->num.int32;
+			break;
+		default:
+			fprintf(stderr, "unkown width\n");
+			break;
+		};
+	}
+
+	return (bn_new_bnum_tok(val, c.width, c.signd));
 }
 
 #define ADD_BLK(AAA, BBB)		\
