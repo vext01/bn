@@ -21,10 +21,9 @@
 
 #include "bn.h"
 
-struct bnum_tok *
-bn_cast(struct bnum_tok *t, struct bn_cast c)
+int64_t
+bn_to_common_signed_64(struct bnum_tok *t)
 {
-	struct bnum_tok		*new;
 	int64_t			val;
 
 	if (t->signd) {
@@ -58,6 +57,14 @@ bn_cast(struct bnum_tok *t, struct bn_cast c)
 			break;
 		};
 	}
+
+	return (val);
+}
+
+struct bnum_tok *
+bn_cast(struct bnum_tok *t, struct bn_cast c)
+{
+	int64_t			val = bn_to_common_signed_64(t);
 
 	return (bn_new_bnum_tok(val, c.width, c.signd));
 }
@@ -199,40 +206,12 @@ bn_new_bnum_tok(int64_t num, uint8_t width, uint8_t signd)
 }
 
 void
-bn_possibly_print_result_arrow(struct bnum_tok *b, uint8_t width, uint8_t signd)
-{
-	if ((b->width == width) && (b->signd == signd))
-		printf("> ");
-	else
-		printf("  ");
-}
-
-void
 bn_print(struct bnum_tok *bn)
 {
-	bn_possibly_print_result_arrow(bn, 1, 0);
-	printf("%-10s: %-16u\n", "uint8_t", bn->num.uint8);
+	int64_t		val = bn_to_common_signed_64(bn);
 
-	bn_possibly_print_result_arrow(bn, 1, 1);
-	printf("%-10s: %-16d\n", "int8_t", bn->num.int8);
-
-	bn_possibly_print_result_arrow(bn, 2, 0);
-	printf("%-10s: %-16u\n", "uint16_t", bn->num.uint16);
-
-	bn_possibly_print_result_arrow(bn, 2, 1);
-	printf("%-10s: %-16d\n", "int16_t", bn->num.int16);
-
-	bn_possibly_print_result_arrow(bn, 4, 0);
-	printf("%-10s: %-16u\n", "uint32_t", bn->num.uint32);
-
-	bn_possibly_print_result_arrow(bn, 4, 1);
-	printf("%-10s: %-16d\n", "int32_t", bn->num.int32);
-
-	bn_possibly_print_result_arrow(bn, 8, 0);
-	printf("%-10s: %-16llu\n", "uint64_t", bn->num.uint64);
-
-	bn_possibly_print_result_arrow(bn, 8, 1);
-	printf("%-10s: %-16lld\n", "int64_t", bn->num.int64);
+	/* XXX print the actual type like C */
+	printf("(%d %s bytes) %-64d\n", bn->width, bn->signd ? "signed" : "unsigned", bn->num.uint8);
 }
 
 int
