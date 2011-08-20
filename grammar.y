@@ -52,6 +52,7 @@
 %token CAST16 CASTU16
 %token CAST32 CASTU32
 %token CAST64 CASTU64
+%token LBRA RBRA
 %token END
 
 %union {
@@ -73,6 +74,7 @@ start: expr END		{ bn_print($1); YYACCEPT;}
 
 expr: num		{ $$ = $1; yydbg("num");}
     | num PLUS expr	{ $$ = bn_add($1, $3); yydbg("num PLUS num");}
+    | LBRA expr RBRA	{ $$ = $2; yydbg("LBRA expr RBRA");}
 
 num: NUM		{ $$ = bn_new_bnum_tok($1, sizeof(int), 1); yydbg("NUM");}
    | CAST8 NUM		{ $$ = bn_new_bnum_tok($2, 1, 1); yydbg("NUM");}

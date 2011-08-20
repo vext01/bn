@@ -71,8 +71,8 @@ char	*err_tmp;	/* temproary buffer for building a yyerror string */
 "(u16)"		{ return CASTU16; }
 "(32)"		{ return CAST32; }
 "(u32)"		{ return CASTU32; }
-"(64)"		{ return CAST64; }
-"(u64)"		{ return CASTU64; }
+"("		{ return LBRA; }
+")"		{ return RBRA; }
 .		{ fprintf(stderr, "syntax error\n"); }
 
 %%
