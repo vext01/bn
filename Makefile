@@ -1,5 +1,6 @@
 CFLAGS=-I/usr/local/include
-LDFLAGS=-L/usr/local/lib -lreadline -ltermcap -ltermcap
+#LDFLAGS=-L/usr/local/lib -lreadline -ltermcap
+LDFLAGS=-L/usr/local/lib
 LEX=flex
 YACC=yacc
 

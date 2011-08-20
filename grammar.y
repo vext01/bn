@@ -94,8 +94,8 @@ cast: CASTU8		{ y("cast: CASTU8"); $$.width = 1; $$.signd = 0;}
 void
 y(const char *msg)
 {
-	//if (l_debug)
-	fprintf(stderr, "yacc: %s\n", msg);
+	if (bn_yyll_debug)
+		fprintf(stderr, "yacc: %s\n", msg);
 }
 
 void yyerror(char *msg)

@@ -36,10 +36,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 
-#include <readline/readline.h>
+/* #include <readline/readline.h> */
 
 #include "bn.h"
+
+uint8_t			bn_yyll_debug = 0;
 
 int64_t
 bn_to_common_signed_64(struct bnum_tok t)
@@ -113,7 +116,6 @@ bn_new_bnum_tok(int64_t num, uint8_t width, uint8_t signd)
 
 	switch(width) {
 	case 1:
-		fprintf(stderr, "width = 8\n");
 		if (signd) {
 			bnum.num.int8 = num;
 		} else {
@@ -121,7 +123,6 @@ bn_new_bnum_tok(int64_t num, uint8_t width, uint8_t signd)
 		}
 		break;
 	case 2:
-		fprintf(stderr, "width = 16\n");
 		if (signd) {
 			bnum.num.int16 = num;
 		} else {
@@ -129,7 +130,6 @@ bn_new_bnum_tok(int64_t num, uint8_t width, uint8_t signd)
 		}
 		break;
 	case 4:
-		fprintf(stderr, "width = 32\n");
 		if (signd) {
 			bnum.num.int32 = num;
 		} else {
@@ -137,7 +137,6 @@ bn_new_bnum_tok(int64_t num, uint8_t width, uint8_t signd)
 		}
 		break;
 	case 8:
-		fprintf(stderr, "width = 64\n");
 		if (signd) {
 			bnum.num.int64 = num;
 		} else {
@@ -183,7 +182,8 @@ bn_print(struct bnum_tok bn)
 	char		*hex = bn_bytes_to_hex((unsigned char *) &val, bn.width);
 
 	/* XXX print the actual type like C */
-	printf("(%d %s bytes)  %d  0x%s\n", bn.width, bn.signd ? "signed" : "unsigned", bn.num.uint8, hex);
+	printf(" = (%d %s bytes):  %d  0x%s\n",
+	    bn.width, bn.signd ? "signed" : "unsigned", bn.num.uint8, hex);
 
 	free(hex);
 }
@@ -191,13 +191,8 @@ bn_print(struct bnum_tok bn)
 int
 main(void)
 {
-	char			*line = 0;
+	/* char			*line = 0; */
 	union bnum		 bn;
-
-	printf("sizeof int = %d\n", sizeof(int));
-	printf("sizeof long = %d\n", sizeof(long));
-	printf("sizeof long long = %d\n", sizeof(long long));
-	printf("sizeof short = %d\n", sizeof(short));
 
 	/* XXX can we bolt on readline? */
 #if 0
@@ -210,7 +205,8 @@ main(void)
 	}
 #endif
 
-	yyparse();
+	while (!feof(stdin))
+		yyparse();
 
 	return (EXIT_SUCCESS);
 

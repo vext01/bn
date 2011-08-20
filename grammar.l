@@ -53,7 +53,8 @@ char	*err_tmp;	/* temproary buffer for building a yyerror string */
 void
 l(char *m)
 {
-	fprintf(stderr, "lex: %s\n", m);
+	if (bn_yyll_debug)
+		fprintf(stderr, "lex: %s\n", m);
 }
 
 %}
