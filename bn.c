@@ -21,6 +21,12 @@
 
 #include "bn.h"
 
+struct bnum_tok *
+bn_cast(struct bnum_tok *t, struct bn_cast c)
+{
+	return (t); /* XXX */
+}
+
 #define ADD_BLK(AAA, BBB)		\
 			if (a->signd && b->signd) \
 				a->num.int##AAA += b->num.int##BBB; \
