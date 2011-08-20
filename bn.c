@@ -102,74 +102,11 @@ bn_cast(struct bnum_tok *t, struct bn_cast c)
 struct bnum_tok *
 bn_add(struct bnum_tok *a, struct bnum_tok *b)
 {
-	switch (a->width) {
-	case 1:
-		switch (b->width) {
-		case 1:
-			ADD_BLK(8, 8);
-			break;
-		case 2:
-			ADD_BLK(8, 16);
-			break;
-		case 4:
-			ADD_BLK(8, 32);
-			break;
-		case 8:
-			ADD_BLK(8, 64);
-			break;
-		};
-		break;
-	case 2:
-		switch (b->width) {
-		case 1:
-			ADD_BLK(16, 8);
-			break;
-		case 2:
-			ADD_BLK(16, 16);
-			break;
-		case 4:
-			ADD_BLK(16, 32);
-			break;
-		case 8:
-			ADD_BLK(16, 64);
-			break;
-		};
-		break;
-	case 4:
-		switch (b->width) {
-		case 1:
-			ADD_BLK(32, 8);
-			break;
-		case 2:
-			ADD_BLK(32, 16);
-			break;
-		case 4:
-			ADD_BLK(32, 32);
-			break;
-		case 8:
-			ADD_BLK(32, 64);
-			break;
-		};
-		break;
-	case 8:
-		switch (b->width) {
-		case 1:
-			ADD_BLK(64, 8);
-			break;
-		case 2:
-			ADD_BLK(64, 16);
-			break;
-		case 4:
-			ADD_BLK(64, 32);
-			break;
-		case 8:
-			ADD_BLK(64, 64);
-			break;
-		};
-		break;
-	};
+	int64_t			val_a = bn_to_common_signed_64(a);
+	int64_t			val_b = bn_to_common_signed_64(b);
 
-	return (a);
+	/* we return the type of the lhs, think that is right */
+	return (bn_new_bnum_tok(val_a + val_b, a->width, a->signd));
 }
 
 struct bnum_tok *
