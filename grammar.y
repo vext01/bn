@@ -70,7 +70,7 @@
 
 %%
 
-start: expr END		{ y("start: expr END"); bn_print($1); }
+start: expr END		{ y("start: expr END"); bn_print($1); YYACCEPT; }
      ;
 
 expr: num PLUS expr	{ y("expr: num PLUS num"); $$ = bn_add($1, $3); }
