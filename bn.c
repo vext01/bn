@@ -35,6 +35,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 #include <readline/readline.h>
 
@@ -102,6 +103,9 @@ struct bnum_tok *
 bn_new_bnum_tok(int64_t num, uint8_t width, uint8_t signd)
 {
 	struct bnum_tok		*bnum;
+
+	if (num > INT32_MAX)
+		fprintf(stderr, "number was too large\n");
 
 	bnum = calloc(1, sizeof(struct bnum_tok));
 	if (!bnum)
