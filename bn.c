@@ -42,7 +42,7 @@
 
 #include "bn.h"
 
-uint8_t			bn_yyll_debug = 0;
+uint8_t			bn_yyll_debug = 1;
 
 int64_t
 bn_to_common_signed_64(struct bnum_tok t)
@@ -205,8 +205,11 @@ main(void)
 	}
 #endif
 
-	while (!feof(stdin))
+	while (!feof(stdin)) {
+		printf("> ");
 		yyparse();
+	}
+	printf("\n");
 
 	return (EXIT_SUCCESS);
 

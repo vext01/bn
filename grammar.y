@@ -72,6 +72,8 @@
 %%
 
 start: expr END		{ y("start: expr END"); bn_print($1); YYACCEPT; }
+     | END		{ YYACCEPT; }
+     | 			{ YYACCEPT; }
      ;
 
 expr: expr PLUS expr	{ y("expr: expr PLUS expr"); $$ = bn_add($1, $3); }
