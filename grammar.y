@@ -73,7 +73,7 @@
 start: expr END		{ y("start: expr END"); bn_print($1); YYACCEPT; }
      ;
 
-expr: num PLUS expr	{ y("expr: num PLUS num"); $$ = bn_add($1, $3); }
+expr: expr PLUS expr	{ y("expr: num PLUS num"); $$ = bn_add($1, $3); }
     | LBRA expr RBRA	{ y("expr: LBRA expr RBRA"); $$ = $2; }
     | cast expr		{ y("expr: cast expr");}
     | num		{ y("expr: num"); $$ = $1; }
