@@ -1,0 +1,2 @@
+(uint8_t) 255 + (uint16_t) 1
+^ parses wrongly, should yield 256.
