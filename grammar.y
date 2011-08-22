@@ -84,12 +84,12 @@ expr: expr PLUS expr	{ y("expr: expr PLUS expr"); $$ = bn_add($1, $3); }
 num: RAWNUM		{ y("num: RAWNUM");
 			  $$ = bn_new_bnum_tok($1, sizeof(int), 1); }
 
-cast: CASTU8		{ y("cast: CASTU8"); $$.width = 1; $$.signd = 0;}
-    |  CAST8		{ y("cast: CAST8"); $$.width = 1; $$.signd = 1; }
-    |  CASTU16		{ y("cast: CASTU16"); $$.width = 2; $$.signd = 0; }
-    |  CAST16		{ y("cast: CAST16"); $$.width = 2; $$.signd = 1; }
-    |  CASTU32		{ y("cast: CASTU32"); $$.width = 4; $$.signd = 0; }
-    |  CAST32		{ y("cast: CAST32"); $$.width = 4; $$.signd = 1; }
+cast: LBRA CASTU8 RBRA	{ y("cast: CASTU8"); $$.width = 1; $$.signd = 0;}
+    | LBRA CAST8 RBRA	{ y("cast: CAST8"); $$.width = 1; $$.signd = 1; }
+    | LBRA CASTU16 RBRA	{ y("cast: CASTU16"); $$.width = 2; $$.signd = 0; }
+    | LBRA CAST16 RBRA	{ y("cast: CAST16"); $$.width = 2; $$.signd = 1; }
+    | LBRA CASTU32 RBRA	{ y("cast: CASTU32"); $$.width = 4; $$.signd = 0; }
+    | LBRA CAST32 RBRA	{ y("cast: CAST32"); $$.width = 4; $$.signd = 1; }
 
 %%
 

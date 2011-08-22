@@ -68,12 +68,12 @@ l(char *m)
 "-"		{ l("MINUS"); return MINUS; }
 "+"		{ l("PLUS"); return PLUS; }
 "\n"		{ l("END"); return END; }
-"(int8_t)"	{ l("CAST8"); return CAST8; }
-"(uint8_t)"	{ l("CASTU8"); return CASTU8; }
-"(int16_t)"	{ l("CAST16"); return CAST16; }
-"(uint16_t)"	{ l("CASTU16"); return CASTU16; }
-"(int32_t)"	{ l("CAST32"); return CAST32; }
-"(uint32_t)"	{ l("CASTU32"); return CASTU32; }
+"int8_t"	{ l("CAST8"); return CAST8; }
+"uint8_t"	{ l("CASTU8"); return CASTU8; }
+"int16_t"	{ l("CAST16"); return CAST16; }
+"uint16_t"	{ l("CASTU16"); return CASTU16; }
+"int32_t"	{ l("CAST32"); return CAST32; }
+"uint32_t"	{ l("CASTU32"); return CASTU32; }
 -*[0-9]*	{ l("RAWNUM");
 		  yylval.yd_rawnum = strtoimax(yytext, NULL, 0);
 		  return RAWNUM; }
