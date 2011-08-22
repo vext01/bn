@@ -98,8 +98,33 @@ bn_add(struct bnum_tok a, struct bnum_tok b)
 	int64_t			val_a = bn_to_common_signed_64(a);
 	int64_t			val_b = bn_to_common_signed_64(b);
 
-	/* we return the type of the lhs, think that is right */
-	return (bn_new_bnum_tok(val_a + val_b, a.width, a.signd));
+	printf("(%s %d) + \n", a.signd ? "signed" : "unsigned", a.width);
+	printf("(%s %d)", b.signd ? "signed" : "unsigned", b.width);
+
+	/* https://www.securecoding.cert.org/confluence/display/seccode/INT02-C.+Understand+integer+conversion+rules */
+	if (a.signd == b.signd) {
+		if (a.width == b.width)
+			return (bn_new_bnum_tok(val_a + val_b, a.width, a.signd));
+		else if (a.width > b.width)
+			return (bn_new_bnum_tok(val_a + val_b, a.width, a.signd));
+		else
+			return (bn_new_bnum_tok(val_a + val_b, b.width, a.signd));
+	} else {
+		if ((!a.signd) && (a.width >= b.width))
+			return (bn_new_bnum_tok(val_a + val_b, a.width, 0));
+		else if ((!b.signd) && (b.width >= a.width))
+			return (bn_new_bnum_tok(val_a + val_b, b.width, 0));
+		else if ((a.signd) && (a.width > b.width))
+			return (bn_new_bnum_tok(val_a + val_b, a.width, 1));
+		else if ((b.signd) && (b.width > a.width))
+			return (bn_new_bnum_tok(val_a + val_b, b.width, 1));
+		else if (a.signd)
+			return (bn_new_bnum_tok(val_a + val_b, a.width, 0));
+		else if (b.signd)
+			return (bn_new_bnum_tok(val_a + val_b, b.width, 0));
+		else
+			fprintf(stderr, "ERROR: impossible integer conversion\n");
+	}
 }
 
 struct bnum_tok

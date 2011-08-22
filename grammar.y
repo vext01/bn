@@ -42,8 +42,6 @@
 #include <stdlib.h>
 #include "bn.h"
 
-/* XXX make casts resilient to spaces in brackets */
-
 %}
 
 %start start
