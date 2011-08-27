@@ -65,6 +65,7 @@
 %type <yd_rawnum> RAWNUM
 %type <yd_num> num
 %type <yd_num> expr
+%type <yd_num> expr1
 %type <yd_cast> cast
 
 %%
@@ -76,7 +77,7 @@ start: expr END		{ y("start: expr END"); bn_print($1); YYACCEPT; }
 
 expr: expr PLUS expr	{ y("expr: expr PLUS expr"); $$ = bn_add($1, $3); }
     | LBRA expr RBRA	{ y("expr: LBRA expr RBRA"); $$ = $2; }
-    | cast expr		{ y("expr: cast expr"); $$ = bn_cast($2, $1); }
+    | cast expr1	{ y("expr: cast expr"); $$ = bn_cast($2, $1); }
     | num		{ y("expr: num"); $$ = $1; }
 
 num: RAWNUM		{ y("num: RAWNUM");
@@ -88,6 +89,11 @@ cast: LBRA CASTU8 RBRA	{ y("cast: CASTU8"); $$.width = 8; $$.signd = 0;}
     | LBRA CAST16 RBRA	{ y("cast: CAST16"); $$.width = 16; $$.signd = 1; }
     | LBRA CASTU32 RBRA	{ y("cast: CASTU32"); $$.width = 32; $$.signd = 0; }
     | LBRA CAST32 RBRA	{ y("cast: CAST32"); $$.width = 32; $$.signd = 1; }
+
+expr1: num		{ $$ = $1; }
+     | LBRA expr RBRA	{ $$ = $2; }
+     | cast expr1	{ y("expr: cast expr"); $$ = bn_cast($2, $1); }
+
 
 %%
 
