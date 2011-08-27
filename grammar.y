@@ -76,9 +76,7 @@ start: expr END		{ y("start: expr END"); bn_print($1); YYACCEPT; }
      ;
 
 expr: expr PLUS expr	{ y("expr: expr PLUS expr"); $$ = bn_add($1, $3); }
-    | LBRA expr RBRA	{ y("expr: LBRA expr RBRA"); $$ = $2; }
-    | cast expr1	{ y("expr: cast expr"); $$ = bn_cast($2, $1); }
-    | num		{ y("expr: num"); $$ = $1; }
+    | expr1		{ y("expr: expr1"); $$ = $1; }
 
 num: RAWNUM		{ y("num: RAWNUM");
 			  $$ = bn_new_bnum_tok($1, sizeof(int) * 8, 1); }
@@ -93,7 +91,6 @@ cast: LBRA CASTU8 RBRA	{ y("cast: CASTU8"); $$.width = 8; $$.signd = 0;}
 expr1: num		{ $$ = $1; }
      | LBRA expr RBRA	{ $$ = $2; }
      | cast expr1	{ y("expr: cast expr"); $$ = bn_cast($2, $1); }
-
 
 %%
 

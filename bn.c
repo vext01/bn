@@ -223,30 +223,30 @@ bn_print(struct bnum_tok bn)
 	case 8:
 		hex = bn_bytes_to_hex((unsigned char *) &bn.num.uint8, 1);
 		if (bn.signd)
-			printf("  (%s): %d  0x%s  %o\n",
+			printf("  (%s): %d  0x%s  0%o\n",
 			    type, bn.num.int8, hex, bn.num.int8);
 		else
-			printf("  (%s): %d  0x%s  %o\n",
+			printf("  (%s): %d  0x%s  0%o\n",
 			    type, bn.num.uint8, hex, bn.num.uint8);
 
 		break;
 	case 16:
 		hex = bn_bytes_to_hex((unsigned char *) &bn.num.uint16, 2);
 		if (bn.signd)
-			printf("  (%s): %d  0x%s  %o\n",
+			printf("  (%s): %d  0x%s  0%o\n",
 			    type, bn.num.int16, hex, bn.num.int16);
 		else
-			printf("  (%s): %d  0x%s  %o\n",
+			printf("  (%s): %d  0x%s  0%o\n",
 			    type, bn.num.uint16, hex, bn.num.uint16);
 
 		break;
 	case 32:
 		hex = bn_bytes_to_hex((unsigned char *) &bn.num.uint32, 4);
 		if (bn.signd)
-			printf("  (%s): %d  0x%s  %o\n",
+			printf("  (%s): %d  0x%s  0%o\n",
 			    type, bn.num.int32, hex, bn.num.int32);
 		else
-			printf("  (%s): %d  0x%s  %o\n",
+			printf("  (%s): %d  0x%s  0%o\n",
 			    type, bn.num.uint32, hex, bn.num.uint32);
 
 		break;
