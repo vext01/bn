@@ -42,7 +42,7 @@
 
 #include "bn.h"
 
-uint8_t			bn_yyll_debug = 1;
+uint8_t			bn_yyll_debug = 0;
 
 int64_t
 bn_to_common_signed_64(struct bnum_tok t)
@@ -187,10 +187,8 @@ bn_bytes_to_hex(unsigned char *bytes, int len)
 
 	memset(hex, 0, hex_len);
 
-	for (i = len-1; i >= 0; i--) { /* XXX little endian only */
-		printf("%02x\n", bytes[i]);
+	for (i = len-1; i >= 0; i--) /* XXX little endian only */
 		snprintf(hex, hex_len, "%s%02x", hex, bytes[i]);
-	}
 
 	return (hex);
 }
@@ -213,41 +211,81 @@ bn_type_strng(struct bnum_tok t)
 }
 
 void
+bn_to_bin(struct bnum_tok bn, char **ret)
+{
+	int			 i;
+	char			*ret_d = *ret;
+
+	*ret = malloc(bn.width + 1);
+	ret_d = *ret;
+
+	if (!ret_d)
+		fprintf(stderr, "Failed to allocate\n");
+
+	for (i = 0; i < bn.width; i++) {
+		switch (bn.width) {
+		case 8:
+			if (bn.signd)
+				ret_d[bn.width - i - 1] = ((bn.num.int8 >> i) & 0x1) ? '1' : '0';
+			else
+				ret_d[bn.width - i - 1] = ((bn.num.uint8 >> i) & 0x1) ? '1' : '0';
+			break;
+		case 16:
+			if (bn.signd)
+				ret_d[bn.width - i - 1] = ((bn.num.int16 >> i) & 0x1) ? '1' : '0';
+			else
+				ret_d[bn.width - i - 1] = ((bn.num.uint16 >> i) & 0x1) ? '1' : '0';
+			break;
+		case 32:
+			if (bn.signd)
+				ret_d[bn.width - i - 1] = ((bn.num.int32 >> i) & 0x1) ? '1' : '0';
+			else
+				ret_d[bn.width - i - 1] = ((bn.num.uint32 >> i) & 0x1) ? '1' : '0';
+			break;
+		}
+	}
+
+	ret_d[bn.width] = 0;
+}
+
+#define BN_OUTPUT_FMT		"  (%6s):\t%d  0x%s  0%o  0b%s\n"
+void
 bn_print(struct bnum_tok bn)
 {
 	int64_t		 val = bn_to_common_signed_64(bn);
-	char		*hex;
+	char		*hex, *bin;
 	char		*type = bn_type_strng(bn);
+
+	bn_to_bin(bn, &bin);
 
 	switch (bn.width) {
 	case 8:
 		hex = bn_bytes_to_hex((unsigned char *) &bn.num.uint8, 1);
 		if (bn.signd)
-			printf("  (%s): %d  0x%s  0%o\n",
-			    type, bn.num.int8, hex, bn.num.int8);
+			printf(BN_OUTPUT_FMT,
+			    type, bn.num.int8, hex, bn.num.int8, bin);
 		else
-			printf("  (%s): %d  0x%s  0%o\n",
-			    type, bn.num.uint8, hex, bn.num.uint8);
-
+			printf(BN_OUTPUT_FMT,
+			    type, bn.num.uint8, hex, bn.num.uint8, bin);
 		break;
 	case 16:
 		hex = bn_bytes_to_hex((unsigned char *) &bn.num.uint16, 2);
 		if (bn.signd)
-			printf("  (%s): %d  0x%s  0%o\n",
-			    type, bn.num.int16, hex, bn.num.int16);
+			printf(BN_OUTPUT_FMT,
+			    type, bn.num.int16, hex, bn.num.int16, bin);
 		else
-			printf("  (%s): %d  0x%s  0%o\n",
-			    type, bn.num.uint16, hex, bn.num.uint16);
+			printf(BN_OUTPUT_FMT,
+			    type, bn.num.uint16, hex, bn.num.uint16, bin);
 
 		break;
 	case 32:
 		hex = bn_bytes_to_hex((unsigned char *) &bn.num.uint32, 4);
 		if (bn.signd)
-			printf("  (%s): %d  0x%s  0%o\n",
-			    type, bn.num.int32, hex, bn.num.int32);
+			printf(BN_OUTPUT_FMT,
+			    type, bn.num.int32, hex, bn.num.int32, bin);
 		else
-			printf("  (%s): %d  0x%s  0%o\n",
-			    type, bn.num.uint32, hex, bn.num.uint32);
+			printf(BN_OUTPUT_FMT,
+			    type, bn.num.uint32, hex, bn.num.uint32, bin);
 
 		break;
 
@@ -255,6 +293,7 @@ bn_print(struct bnum_tok bn)
 		fprintf(stderr, "Cant print integer of this width\n");
 	};
 
+	free(bin);
 	free(hex);
 	free(type);
 }
