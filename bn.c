@@ -301,26 +301,6 @@ bn_print(struct bnum_tok bn)
 int
 main(void)
 {
-	/* char			*line = 0; */
-	union bnum		 bn;
-
-	/* XXX can we bolt on readline? */
-#if 0
-	while ((line = readline("> ")) != NULL) {
-		if (*line) {
-			bn.int64 = strtoimax(line, NULL, 0);
-			bn_print(bn);
-		}
-		free(line);
-	}
-#endif
-
-	while (!feof(stdin)) {
-		printf("> ");
-		yyparse();
-	}
-	printf("\n");
-
 	return (EXIT_SUCCESS);
 
 }
