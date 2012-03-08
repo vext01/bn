@@ -33,19 +33,24 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <sys/types.h>
+
+#include <err.h>
+#include <errno.h>
+#include <limits.h>
+#include <regex.h>
+#include <stdarg.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 #include <string.h>
 
-/* #include <readline/readline.h> */
-
 #include "bn.h"
+#include "linenoise/linenoise.h"
 
-uint8_t			bn_yyll_debug = 0;
-
+#if 0
 int64_t
-bn_to_common_signed_64(struct bnum_tok t)
+bn_to_common_signed_64(struct bnum_tok *t)
 {
 	int64_t			val;
 
@@ -297,10 +302,158 @@ bn_print(struct bnum_tok bn)
 	free(hex);
 	free(type);
 }
+#endif
+
+void *
+xmalloc(size_t sz)
+{
+	void			*ptr;
+
+	ptr = malloc(sz);
+	if (!ptr)
+		errx(errno, "malloc");
+
+	return (ptr);
+
+}
+
+
+void *
+xcalloc(size_t sz, size_t size)
+{
+	void			*ptr;
+
+	ptr = calloc(sz, size);
+	if (!ptr)
+		errx(errno, "calloc");
+
+	return (ptr);
+}
+
+void *
+xrealloc(void *old_p, size_t sz)
+{
+	void			*ptr;
+
+	ptr = realloc(old_p, sz);
+	if (!ptr)
+		errx(errno, "realloc");
+
+	return (ptr);
+}
+
+char *
+xstrdup(const char *s)
+{
+	char *dup = strdup(s);
+
+	if (dup == NULL)
+		errx(errno, "strdup");
+
+	return (dup);
+}
+
+int
+xasprintf(char **buf, char *fmt, ...)
+{
+	va_list			ap;
+	int			ret;
+
+	va_start(ap, fmt);
+	ret = vasprintf(buf, fmt, ap);
+
+	if (ret == -1)
+		errx(errno, "vasprintf");
+
+	return (ret);
+}
+
+
+/*
+ * keep as simple as possible -- no lex/yacc plz
+ */
+#define RE_WHITE		"[ \t\r\n]*"
+int
+bn_parse(char *line, struct bn_tok *b)
+{
+	regex_t			 rx1, rx2;
+	regmatch_t		 matches[3];
+	char			*tok1, *tok2, *ep;
+	int64_t			 numpart;
+	struct bn_num		*b_num;
+
+	/* form 1: num */
+	if (regcomp(&rx1, RE_WHITE "[0-9]+" RE_WHITE, REG_EXTENDED))
+		errx(1, "regcomp");
+
+	/* form 2: cast num */
+	if (regcomp(&rx2, RE_WHITE "\\(.*\\)" RE_WHITE "[0-9]+" RE_WHITE, REG_EXTENDED))
+		errx(1, "regcomp");
+
+	/* XXX: form 3: operators */
+
+	printf("TESTING: %s\n", line);
+	if (regexec(&rx1, line, 1, matches, 0) == 0) {
+
+		tok1 = xcalloc(1, matches[0].rm_eo - matches[0].rm_so + 1);
+		strncpy(tok1, &line[matches[0].rm_so], matches[0].rm_eo - matches[0].rm_so);
+
+		printf("NUM: %s\n", tok1);
+
+		/* parse number */
+		numpart = strtoll(tok1, &ep, 0);
+		if (tok1[0] == '\0' || *ep != '\0') {
+			fprintf(stderr, "NaN\n"); /* XXX clean up */
+			return (-1);
+		}
+		if (errno == ERANGE && (numpart == LONG_MAX || numpart == LONG_MIN)) {
+			fprintf(stderr, "Range error\n"); /* XXX clean up */
+			return (-1);
+		}
+
+		b_num = xcalloc(1, sizeof(struct bn_num));
+		b_num->type = BN_TYPE_NUM;
+		b = b; /* XXX */
+
+		free(tok1);
+	}
+
+	if (regexec(&rx2, line, 2, matches, 0) == 0) {
+
+		tok1 = xcalloc(1, matches[0].rm_eo - matches[0].rm_so + 1);
+		strncpy(tok1, &line[matches[0].rm_so], matches[0].rm_eo - matches[0].rm_so);
+
+		tok2 = xcalloc(1, matches[1].rm_eo - matches[1].rm_so + 1);
+		strncpy(tok2, &line[matches[1].rm_so], matches[1].rm_eo - matches[1].rm_so);
+
+		printf("CAST NUM: %s %s\n", tok1, tok2);
+		b = b; /* XXX */
+
+		free(tok1);
+		free(tok2);
+	}
+
+	return (0);
+}
 
 int
 main(void)
 {
+	char			*line;
+	struct bn_tok		 tok;
+
+	while((line = linenoise("bn> ")) != NULL) {
+		if (line[0] != '\0') {
+			linenoiseHistoryAdd(line);
+		}
+		if (bn_parse(line, &tok) < 0) {
+			fprintf(stderr, "*parse error\n");
+		} else {
+
+		}
+		free(line);
+	}
+
 	return (EXIT_SUCCESS);
 
 }

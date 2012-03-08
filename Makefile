@@ -1,3 +1,6 @@
+CFLAGS=-Wall -Wextra
+
+.PHONY: all
 all: bn
 
 bn: linenoise bn.c bn.h

@@ -28,19 +28,30 @@ union bnum {
 	int64_t		int64;
 };
 
-struct bnum_tok {
+struct bn_tok {
+	int		type;
+#define BN_TYPE_NUM	(0)
+#define BN_TYPE_OP	(1)
+};
+
+struct bn_num {
+	int		type;
 	union bnum	num;
 	uint8_t		width;
 	uint8_t		signd;
+};
+
+struct bn_oper {
+	int		type;
+	int		oper;
+#define BN_OPER_PLUS	(0);
+#define BN_OPER_MINUS	(1);
 };
 
 struct bn_cast {
 	uint8_t		width; /* bytes */
 	uint8_t		signd;
 };
-
-
-extern uint8_t		bn_yyll_debug;
 
 struct bnum_tok	bn_new_bnum_tok(int64_t num, uint8_t width, uint8_t signd);
 struct bnum_tok	bn_add(struct bnum_tok a, struct bnum_tok b);
