@@ -48,47 +48,47 @@
 #include "bn.h"
 #include "linenoise/linenoise.h"
 
-#if 0
-int64_t
-bn_to_common_signed_64(struct bnum_tok *t)
+int
+bn_to_common_signed_64(int64_t *val, struct bn_num *t)
 {
-	int64_t			val;
-
-	if (t.signd) {
-		switch (t.width) {
+	if (t->signd) {
+		switch (t->width) {
 		case 8:
-			val = (int8_t) t.num.int8;
+			*val = (int8_t) t->num.int8;
 			break;
 		case 16:
-			val = (int16_t) t.num.int16;
+			*val = (int16_t) t->num.int16;
 			break;
 		case 32:
-			val = (int32_t) t.num.int32;
+			*val = (int32_t) t->num.int32;
 			break;
 		default:
 			fprintf(stderr, "unkown width\n");
+			return (-1);
 			break;
 		};
 	} else {
-		switch (t.width) {
+		switch (t->width) {
 		case 8:
-			val = (uint8_t) t.num.int8;
+			*val = (uint8_t) t->num.int8;
 			break;
 		case 16:
-			val = (uint16_t) t.num.int16;
+			*val = (uint16_t) t->num.int16;
 			break;
 		case 32:
-			val = (uint32_t) t.num.int32;
+			*val = (uint32_t) t->num.int32;
 			break;
 		default:
 			fprintf(stderr, "unkown width\n");
+			return (-1);
 			break;
 		};
 	}
 
-	return (val);
+	return (0);
 }
 
+#if 0
 struct bnum_tok
 bn_cast(struct bnum_tok t, struct bn_cast c)
 {
@@ -131,166 +131,159 @@ bn_add(struct bnum_tok a, struct bnum_tok b)
 			fprintf(stderr, "ERROR: impossible integer conversion\n");
 	}
 }
+#endif
 
-struct bnum_tok
-bn_new_bnum_tok(int64_t num, uint8_t width, uint8_t signd)
+int
+bn_new_bn_num(struct bn_num *bnum, int64_t num, uint8_t width, uint8_t signd)
 {
-	struct bnum_tok		bnum;
-
 	if (num > INT32_MAX)
 		fprintf(stderr, "number was too large\n");
 
-	memset(&bnum, 0, sizeof(bnum));
-	bnum.signd = signd;
-	bnum.width = width;
+	memset(bnum, 0, sizeof(bnum));
+	bnum->tok.type = BN_TYPE_NUM;
+	bnum->signd = signd;
+	bnum->width = width;
 
 	switch(width) {
 	case 8:
 		if (signd) {
-			bnum.num.int8 = num;
+			bnum->num.int8 = num;
 		} else {
-			bnum.num.uint8 = num;
+			bnum->num.uint8 = num;
 		}
 		break;
 	case 16:
 		if (signd) {
-			bnum.num.int16 = num;
+			bnum->num.int16 = num;
 		} else {
-			bnum.num.uint16 = num;
+			bnum->num.uint16 = num;
 		}
 		break;
 	case 32:
 		if (signd) {
-			bnum.num.int32 = num;
+			bnum->num.int32 = num;
 		} else {
-			bnum.num.uint32 = num;
+			bnum->num.uint32 = num;
 		}
 		break;
 	default:
 		fprintf(stderr, "unknown number width\n");
 	};
 
-	return (bnum);
+	return (0);
 }
 
 
 /*
- * Turn bytes into hex for storage.
- * Caller must free. (this function is from HGD)
+ * Caller must free. (modified from HGD)
  */
-char *
-bn_bytes_to_hex(unsigned char *bytes, int len)
+int
+bn_num_to_hex(char **hex, struct bn_num *b)
 {
-	char *hex;
-	int i, hex_len;
+	int i, hex_len, len;
 
+	len = b->width / 8;
 	hex_len = len * 2 + 1;
-	hex = malloc(hex_len); /* two hex chars for each byte */
+	*hex = xmalloc(hex_len); /* two hex chars for each byte */
 
-	if (!hex)
-		fprintf(stderr, "malloc crapped out\n");
+	memset(*hex, 0, hex_len);
+	for (i = len-1; i >= 0; i--) {
+		snprintf(*hex, hex_len, "%s%02x",
+		    *hex, ((unsigned char *) (&(b->num.uint64)))[i]);
+	}
 
-	memset(hex, 0, hex_len);
-
-	for (i = len-1; i >= 0; i--) /* XXX little endian only */
-		snprintf(hex, hex_len, "%s%02x", hex, bytes[i]);
-
-	return (hex);
+	return (0);
 }
 
-/* return a heap allocated type string from a bnum */
-char *
-bn_type_strng(struct bnum_tok t)
+int
+bn_type_string(char **ret, struct bn_num *t)
 {
-	char		*ret;
-
-	if (t.signd)
-		asprintf(&ret, "int%d_t", (int) t.width);
+	if (t->signd)
+		xasprintf(ret, "int%d_t", (int) t->width);
 	else
-		asprintf(&ret, "uint%d_t", (int) t.width);
+		xasprintf(ret, "uint%d_t", (int) t->width);
 
-	if (!ret)
+	if (!*ret) {
 		fprintf(stderr, "asprintf failed\n");
+		return (-1);
+	}
 
-	return (ret);
+	return (0);
 }
 
 void
-bn_to_bin(struct bnum_tok bn, char **ret)
+bn_to_bin(char **ret, struct bn_num *bn)
 {
 	int			 i;
-	char			*ret_d = *ret;
+	char			*ret_d;
 
-	*ret = malloc(bn.width + 1);
+	*ret = xmalloc(bn->width + 1);
 	ret_d = *ret;
 
-	if (!ret_d)
-		fprintf(stderr, "Failed to allocate\n");
-
-	for (i = 0; i < bn.width; i++) {
-		switch (bn.width) {
+	for (i = 0; i < bn->width; i++) {
+		switch (bn->width) {
 		case 8:
-			if (bn.signd)
-				ret_d[bn.width - i - 1] = ((bn.num.int8 >> i) & 0x1) ? '1' : '0';
+			if (bn->signd)
+				ret_d[bn->width - i - 1] = ((bn->num.int8 >> i) & 0x1) ? '1' : '0';
 			else
-				ret_d[bn.width - i - 1] = ((bn.num.uint8 >> i) & 0x1) ? '1' : '0';
+				ret_d[bn->width - i - 1] = ((bn->num.uint8 >> i) & 0x1) ? '1' : '0';
 			break;
 		case 16:
-			if (bn.signd)
-				ret_d[bn.width - i - 1] = ((bn.num.int16 >> i) & 0x1) ? '1' : '0';
+			if (bn->signd)
+				ret_d[bn->width - i - 1] = ((bn->num.int16 >> i) & 0x1) ? '1' : '0';
 			else
-				ret_d[bn.width - i - 1] = ((bn.num.uint16 >> i) & 0x1) ? '1' : '0';
+				ret_d[bn->width - i - 1] = ((bn->num.uint16 >> i) & 0x1) ? '1' : '0';
 			break;
 		case 32:
-			if (bn.signd)
-				ret_d[bn.width - i - 1] = ((bn.num.int32 >> i) & 0x1) ? '1' : '0';
+			if (bn->signd)
+				ret_d[bn->width - i - 1] = ((bn->num.int32 >> i) & 0x1) ? '1' : '0';
 			else
-				ret_d[bn.width - i - 1] = ((bn.num.uint32 >> i) & 0x1) ? '1' : '0';
+				ret_d[bn->width - i - 1] = ((bn->num.uint32 >> i) & 0x1) ? '1' : '0';
 			break;
 		}
 	}
 
-	ret_d[bn.width] = 0;
+	ret_d[bn->width] = 0;
 }
 
-#define BN_OUTPUT_FMT		"  (%6s):\t%d  0x%s  0%o  0b%s\n"
+#define BN_OUTPUT_FMT	"  (%6s):  (%8d)  0x(%16s)  0(%8o)  0b(%s)\n"
 void
-bn_print(struct bnum_tok bn)
+bn_print_num(struct bn_num *bn)
 {
-	int64_t		 val = bn_to_common_signed_64(bn);
+	int64_t		 val;
 	char		*hex, *bin;
-	char		*type = bn_type_strng(bn);
+	char		*type;
 
-	bn_to_bin(bn, &bin);
+	val = bn->num.int64;
+	bn_type_string(&type, bn);
+	bn_to_bin(&bin, bn);
+	bn_num_to_hex(&hex, bn);
 
-	switch (bn.width) {
+	switch (bn->width) {
 	case 8:
-		hex = bn_bytes_to_hex((unsigned char *) &bn.num.uint8, 1);
-		if (bn.signd)
+		if (bn->signd)
 			printf(BN_OUTPUT_FMT,
-			    type, bn.num.int8, hex, bn.num.int8, bin);
+			    type, bn->num.int8, hex, bn->num.int8, bin);
 		else
 			printf(BN_OUTPUT_FMT,
-			    type, bn.num.uint8, hex, bn.num.uint8, bin);
+			    type, bn->num.uint8, hex, bn->num.uint8, bin);
 		break;
 	case 16:
-		hex = bn_bytes_to_hex((unsigned char *) &bn.num.uint16, 2);
-		if (bn.signd)
+		if (bn->signd)
 			printf(BN_OUTPUT_FMT,
-			    type, bn.num.int16, hex, bn.num.int16, bin);
+			    type, bn->num.int16, hex, bn->num.int16, bin);
 		else
 			printf(BN_OUTPUT_FMT,
-			    type, bn.num.uint16, hex, bn.num.uint16, bin);
+			    type, bn->num.uint16, hex, bn->num.uint16, bin);
 
 		break;
 	case 32:
-		hex = bn_bytes_to_hex((unsigned char *) &bn.num.uint32, 4);
-		if (bn.signd)
+		if (bn->signd)
 			printf(BN_OUTPUT_FMT,
-			    type, bn.num.int32, hex, bn.num.int32, bin);
+			    type, bn->num.int32, hex, bn->num.int32, bin);
 		else
 			printf(BN_OUTPUT_FMT,
-			    type, bn.num.uint32, hex, bn.num.uint32, bin);
+			    type, bn->num.uint32, hex, bn->num.uint32, bin);
 
 		break;
 
@@ -302,7 +295,6 @@ bn_print(struct bnum_tok bn)
 	free(hex);
 	free(type);
 }
-#endif
 
 void *
 xmalloc(size_t sz)
@@ -368,17 +360,35 @@ xasprintf(char **buf, char *fmt, ...)
 	return (ret);
 }
 
+int
+bn_parse_number_to_int64(char *num_str, int64_t *numpart)
+{
+	char			*ep;
+
+	*numpart = strtoll(num_str, &ep, 0);
+	if (num_str[0] == '\0' || *ep != '\0') {
+		fprintf(stderr, "NaN\n"); /* XXX clean up */
+		return (-1);
+	}
+	if (errno == ERANGE && (*numpart == LONG_MAX || *numpart == LONG_MIN)) {
+		fprintf(stderr, "Range error\n"); /* XXX clean up */
+		return (-1);
+	}
+
+	return (0);
+}
+
 
 /*
  * keep as simple as possible -- no lex/yacc plz
  */
 #define RE_WHITE		"[ \t\r\n]*"
 int
-bn_parse(char *line, struct bn_tok *b)
+bn_parse(char *line, struct bn_tok **b)
 {
-	regex_t			 rx1, rx2;
+	regex_t			 rx1; /* rx2; */
 	regmatch_t		 matches[3];
-	char			*tok1, *tok2, *ep;
+	char			*tok1; /* *tok2; */
 	int64_t			 numpart;
 	struct bn_num		*b_num;
 
@@ -387,37 +397,34 @@ bn_parse(char *line, struct bn_tok *b)
 		errx(1, "regcomp");
 
 	/* form 2: cast num */
+#if 0
 	if (regcomp(&rx2, RE_WHITE "\\(.*\\)" RE_WHITE "[0-9]+" RE_WHITE, REG_EXTENDED))
 		errx(1, "regcomp");
+#endif
 
 	/* XXX: form 3: operators */
 
-	printf("TESTING: %s\n", line);
 	if (regexec(&rx1, line, 1, matches, 0) == 0) {
 
 		tok1 = xcalloc(1, matches[0].rm_eo - matches[0].rm_so + 1);
 		strncpy(tok1, &line[matches[0].rm_so], matches[0].rm_eo - matches[0].rm_so);
 
-		printf("NUM: %s\n", tok1);
-
 		/* parse number */
-		numpart = strtoll(tok1, &ep, 0);
-		if (tok1[0] == '\0' || *ep != '\0') {
-			fprintf(stderr, "NaN\n"); /* XXX clean up */
-			return (-1);
-		}
-		if (errno == ERANGE && (numpart == LONG_MAX || numpart == LONG_MIN)) {
-			fprintf(stderr, "Range error\n"); /* XXX clean up */
-			return (-1);
-		}
+		if (bn_parse_number_to_int64(tok1, &numpart) < 0)
+			return (-1); /* XXX clean up */
 
-		b_num = xcalloc(1, sizeof(struct bn_num));
-		b_num->type = BN_TYPE_NUM;
-		b = b; /* XXX */
 
+		b_num = calloc(1, sizeof(struct bn_num));
+		bn_new_bn_num(b_num, numpart, 32, 1); /* default: signed 32  */
 		free(tok1);
+
+		*b = (struct bn_tok *) b_num;
+		return (0);
 	}
 
+	return (-1);
+
+#if 0
 	if (regexec(&rx2, line, 2, matches, 0) == 0) {
 
 		tok1 = xcalloc(1, matches[0].rm_eo - matches[0].rm_so + 1);
@@ -434,13 +441,15 @@ bn_parse(char *line, struct bn_tok *b)
 	}
 
 	return (0);
+#endif
 }
 
 int
 main(void)
 {
 	char			*line;
-	struct bn_tok		 tok;
+	struct bn_tok		*tok;
+	struct bn_num		*bnum;
 
 	while((line = linenoise("bn> ")) != NULL) {
 		if (line[0] != '\0') {
@@ -448,9 +457,15 @@ main(void)
 		}
 		if (bn_parse(line, &tok) < 0) {
 			fprintf(stderr, "*parse error\n");
-		} else {
-
+			free(line);
+			continue;
 		}
+
+		if (tok->type == BN_TYPE_NUM) {
+			bnum = (struct bn_num *) tok;
+			bn_print_num(bnum);
+		}
+
 		free(line);
 	}
 

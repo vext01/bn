@@ -35,26 +35,21 @@ struct bn_tok {
 };
 
 struct bn_num {
-	int		type;
+	struct bn_tok	tok;
 	union bnum	num;
 	uint8_t		width;
 	uint8_t		signd;
 };
 
 struct bn_oper {
-	int		type;
+	struct bn_tok	tok;
 	int		oper;
 #define BN_OPER_PLUS	(0);
 #define BN_OPER_MINUS	(1);
 };
 
-struct bn_cast {
-	uint8_t		width; /* bytes */
-	uint8_t		signd;
-};
 
-struct bnum_tok	bn_new_bnum_tok(int64_t num, uint8_t width, uint8_t signd);
-struct bnum_tok	bn_add(struct bnum_tok a, struct bnum_tok b);
-struct bnum_tok bn_cast(struct bnum_tok t, struct bn_cast c);
+int		 xasprintf(char **buf, char *fmt, ...);
+void		*xmalloc(size_t sz);
 
 #endif
